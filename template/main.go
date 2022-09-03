@@ -23,4 +23,7 @@ func main() {
 
 	ft := funcMapTemplate{}
 	run(ft)
+
+	pt := pipelineTemplate{}
+	run(pt)
 }
