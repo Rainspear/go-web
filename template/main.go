@@ -20,4 +20,7 @@ func main() {
 
 	st := structTemplate{}
 	run(st)
+
+	ft := funcMapTemplate{}
+	run(ft)
 }
