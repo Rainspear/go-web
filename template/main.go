@@ -26,4 +26,7 @@ func main() {
 
 	pt := pipelineTemplate{}
 	run(pt)
+
+	nt := nestedTemplate{}
+	run(nt)
 }
