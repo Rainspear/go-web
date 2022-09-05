@@ -9,6 +9,9 @@ func run(c commonServer) {
 }
 
 func main() {
-	ts := telnetServer{}
-	run(ts)
+	// ts := telnetServer{}
+	// run(ts)
+
+	ss := scannerServer{}
+	run(ss)
 }
