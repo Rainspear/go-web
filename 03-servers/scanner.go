@@ -33,6 +33,7 @@ func handle(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		ln := (scanner.Text())
+		// io.WriteString(conn, "Hello")
 		fmt.Println(ln)
 	}
 	defer conn.Close()
