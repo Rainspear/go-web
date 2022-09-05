@@ -1,0 +1,14 @@
+package main
+
+type commonServer interface {
+	executeMain()
+}
+
+func run(c commonServer) {
+	c.executeMain()
+}
+
+func main() {
+	ts := telnetServer{}
+	run(ts)
+}
