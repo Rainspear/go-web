@@ -12,6 +12,9 @@ func main() {
 	// ts := telnetServer{}
 	// run(ts)
 
-	ss := scannerServer{}
-	run(ss)
+	// ss := scannerServer{}
+	// run(ss)
+
+	hs := handleServer{}
+	run(hs)
 }
