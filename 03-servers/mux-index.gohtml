@@ -17,8 +17,20 @@
     <h3>Page: {{.Title}}</h3>
     <h3>Method: {{.Method}}</h3>
     <p>{{.Para}}</p>
-    {{if .Render}}
-      {{.NestedTemplate}}
+    {{/* {{template "Apply"}} */}}
+    {{if eq .Render true}}
+      {{if eq .NestedTemplate "Apply"}}
+      {{template "Apply"}}
+      {{end}}
+      {{if eq .NestedTemplate "Contact"}}
+      {{template "Contact"}}
+      {{end}}
+      {{if eq .NestedTemplate "About"}}
+      {{template "About"}}
+      {{end}}
+      {{if eq .NestedTemplate "Apply"}}
+      {{template "Apply"}}
+      {{end}}
     {{end}}
     <script src="" async defer></script>
   </body>
