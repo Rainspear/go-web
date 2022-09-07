@@ -15,6 +15,9 @@ func main() {
 	// ss := scannerServer{}
 	// run(ss)
 
-	hs := handleServer{}
-	run(hs)
+	// hs := handleServer{}
+	// run(hs)
+
+	ms := muxServer{}
+	run(ms)
 }
