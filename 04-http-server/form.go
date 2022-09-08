@@ -14,10 +14,15 @@ func (contactHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	tpl.ExecuteTemplate(w, "index.gohtml", r.Form)
+	tpl.ExecuteTemplate(w, "index.gohtml", r.Form) // data in body and query
+	// tpl.ExecuteTemplate(w, "index.gohtml", r.PostForm) // data only in body
+
 }
 
 func (formServer) executeMain() {
 	ch := contactHandler{}
-	http.ListenAndServe(":8089", ch)
+	err := http.ListenAndServe(":8089", ch)
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
