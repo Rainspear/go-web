@@ -22,14 +22,29 @@ func (about) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "About Handler")
 }
 
-func (muxServer) executeMain() {
-	var c contact
-	var a about
-	mux := http.NewServeMux() // it is still Handler type
-	mux.Handle("/contact", c)
-	mux.Handle("/about", a)
+func contactHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("About Handler with default")
+	io.WriteString(w, "About Handler with default")
+}
 
-	err := http.ListenAndServe(":8089", mux)
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("About Handler with default")
+	io.WriteString(w, "About Handler with default")
+}
+
+func (muxServer) executeMain() {
+	// new mux
+	// var c contact
+	// var a about
+	// mux := http.NewServeMux()  // it is still Handler type
+	// mux.Handle("/contact/", c) // match relative path
+	// mux.Handle("/about", a)    // match exact path
+	// err := http.ListenAndServe(":8089", mux)
+
+	// default mux
+	http.HandleFunc("/contact/", contactHandler)
+	http.HandleFunc("/about", aboutHandler)
+	err := http.ListenAndServe(":8089", nil)
 	if err != nil {
 		log.Println(err.Error())
 	}
