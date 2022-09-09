@@ -8,18 +8,19 @@ import (
 )
 
 type muxServer struct{}
-
 type contact int
 type about int
 
-/* Can implicity understand as below additional code
-
+// Can implicity understand as below code
+// So that handlerfunc can be taken as argument of handlefunc
+// right now handlerfunc is still handler type because it implements ServerHTTP method
+// func handle(type handler interface -> ServeHTTP(w, r))
+// func handlefunc(type handlerfunc func -> ServeHTTP(w, r))
+/*
 type handlerfunc func(w http.ResponseWriter, r *http.Request)
 func (h handlerfunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h(w,r)
 }
-	// So that handlerfunc can be taken as argument of handlefunc
-	// right now handlerfunc is still handler type because it implements ServerHTTP method
 */
 
 func (contact) ServeHTTP(w http.ResponseWriter, r *http.Request) {
