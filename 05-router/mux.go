@@ -58,6 +58,10 @@ func (muxServer) executeMain() {
 	mux.HandleFunc("/about", aboutHandler)      // this is handle func that take HandlerFunc as argument
 	err := http.ListenAndServe(":8089", mux)
 
+	// combine handle and handlefunc
+	// http.Handle("/contact/", http.HandlerFunc(contactHandler))
+	// http.Handle("/about", http.HandlerFunc(aboutHandler))
+
 	// default mux
 	// http.HandleFunc("/contact/", contactHandler)
 	// http.HandleFunc("/about", aboutHandler)
