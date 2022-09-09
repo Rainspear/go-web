@@ -1,6 +1,8 @@
 package main
 
-import "html/template"
+import (
+	"html/template"
+)
 
 type server interface {
 	executeMain()

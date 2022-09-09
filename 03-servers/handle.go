@@ -21,7 +21,7 @@ func (handleServer) executeMain() {
 
 	for {
 		con, err := li.Accept()
-		if err != nil && 1 == 2 {
+		if err != nil {
 			log.Println(err)
 		}
 		go handleRequest(con)
