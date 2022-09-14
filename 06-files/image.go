@@ -17,7 +17,7 @@ func d(w http.ResponseWriter, r *http.Request) {
 }
 
 func dogPig(w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("corgi.jpg")
+	f, err := os.Open("/images/corgi.jpg")
 	if err != nil {
 		http.Error(w, "file not found", 404)
 		return
@@ -28,11 +28,11 @@ func dogPig(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveDog(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "corgi.jpg")
+	http.ServeFile(w, r, "/images/corgi.jpg")
 }
 
 func serveContent(w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("corgi.jpg")
+	f, err := os.Open("/images/corgi.jpg")
 	if err != nil {
 		http.Error(w, "file not found", 404)
 		return
@@ -50,7 +50,8 @@ func serveContent(w http.ResponseWriter, r *http.Request) {
 
 func (imageServer) executeMain() {
 	http.Handle("/", http.FileServer(http.Dir(".")))
-	http.Handle("/test", http.HandlerFunc(d)) // route must be "/"
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./images")))) // serve request as static
+	http.Handle("/test", http.HandlerFunc(d))                                                   // route must be "/"
 	http.Handle("/dog", http.HandlerFunc(dogPig))
 	http.Handle("/serve-dog", http.HandlerFunc(serveDog))
 	http.Handle("/serve-content", http.HandlerFunc(serveContent))

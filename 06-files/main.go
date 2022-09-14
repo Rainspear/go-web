@@ -9,6 +9,12 @@ func run(f fileServer) {
 }
 
 func main() {
-	is := imageServer{}
-	run(is)
+	// is := imageServer{}
+	// run(is)
+
+	// fs := fileContentServer{}
+	// run(fs)
+
+	es := exerciseServer{}
+	run(es)
 }
