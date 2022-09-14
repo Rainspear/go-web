@@ -23,6 +23,7 @@ func dogPig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer f.Close()
+
 	io.Copy(w, f)
 }
 
@@ -48,7 +49,8 @@ func serveContent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (imageServer) executeMain() {
-	http.Handle("/", http.HandlerFunc(d))
+	http.Handle("/", http.FileServer(http.Dir(".")))
+	http.Handle("/test", http.HandlerFunc(d)) // route must be "/"
 	http.Handle("/dog", http.HandlerFunc(dogPig))
 	http.Handle("/serve-dog", http.HandlerFunc(serveDog))
 	http.Handle("/serve-content", http.HandlerFunc(serveContent))
