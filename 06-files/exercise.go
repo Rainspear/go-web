@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"text/template"
 )
 
 type exerciseServer struct {
@@ -15,7 +16,10 @@ func foo(w http.ResponseWriter, r *http.Request) {
 }
 
 func execiseDog(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "text/plain;charset=utf-8")
+	tpl := template.Must(template.ParseFiles("dog.gohtml"))
+	serveCorgi(w, r)
+	tpl.ExecuteTemplate(w, "dog.gohtml", nil)
 }
 
 func serveCorgi(w http.ResponseWriter, r *http.Request) {
