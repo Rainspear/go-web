@@ -55,6 +55,7 @@ func (imageServer) executeMain() {
 	http.Handle("/dog", http.HandlerFunc(dogPig))
 	http.Handle("/serve-dog", http.HandlerFunc(serveDog))
 	http.Handle("/serve-content", http.HandlerFunc(serveContent))
+	http.Handle("/favicon.ixo", http.NotFoundHandler()) // this will return handlerfunc(NotFound) || NotFound (w) handler {Error(w, "Error 404 Notfound")}
 	err := http.ListenAndServe(":8089", nil)
 	if err != nil {
 		log.Println("Can not start server on port 8089")

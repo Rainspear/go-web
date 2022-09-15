@@ -28,6 +28,8 @@ func serveCorgi(w http.ResponseWriter, r *http.Request) {
 
 func (exerciseServer) executeMain() {
 	http.Handle("/", http.HandlerFunc(foo))
+	// http.Handle("/", http.FileServer(http.Dir("./exercise")))
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./exercise"))))
 	http.HandleFunc("/dog/", execiseDog)
 	http.HandleFunc("/picture", serveCorgi)
 	log.Fatalln(http.ListenAndServe(":8089", nil))
