@@ -9,6 +9,9 @@ func run(s stateServer) {
 }
 
 func main() {
-	qs := queryState{}
-	run(qs)
+	// qs := queryState{}
+	// run(qs)
+
+	fs := fileState{}
+	run(fs)
 }

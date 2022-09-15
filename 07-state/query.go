@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -9,10 +10,47 @@ import (
 
 type queryState struct{}
 
+type person struct {
+	FirstName  string
+	LastName   string
+	Subscribed bool
+}
+
 func (queryState) executeMain() {
-	http.Handle("/", http.HandlerFunc(dog))
+	http.Handle("/", http.HandlerFunc(home))
+	http.Handle("/dog", http.HandlerFunc(dog))
 	http.Handle("/favicon.ico", http.HandlerFunc(http.NotFound))
 	log.Println(http.ListenAndServe(":8089", nil))
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
+	f := r.FormValue("first")
+	l := r.FormValue("last")
+	s := r.FormValue("subscribe") == "on"
+	// fmt.Println(r.FormValue("subscribe")) // will print "on"
+	data := person{f, l, s}
+	body := `
+	<form method="POST">
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" name="first">
+    <br>
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" name="last">
+    <br>
+    <label for="sub">Subscribe</label>
+    <input type="checkbox" id="sub" name="subscribe">
+    <br>
+    <input type="submit">
+	</form>
+	<br>
+	<h1>First: {{.FirstName}}</h1>
+	<h1>Last: {{.LastName}}</h1>
+	<h1>Subscribed: {{.Subscribed}}</h1>
+`
+	tpl := template.Must(template.New("index.gohtml").Parse(body))
+	tpl.ExecuteTemplate(w, "index.gohtml", data)
+	// w.Write([]byte(body))
 }
 
 func dog(w http.ResponseWriter, r *http.Request) {
