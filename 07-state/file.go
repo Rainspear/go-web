@@ -35,6 +35,7 @@ func cat(w http.ResponseWriter, r *http.Request) {
 		}
 		s = string(bs)
 	}
+	w.Header().Add("Content-Type", "text/html; charset=utf-8;")
 	io.WriteString(w, `
 	<form method="POST" enctype="multipart/form-data">
 	<input type="file" name="q">
