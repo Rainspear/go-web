@@ -67,7 +67,7 @@ func serveDogImage(w http.ResponseWriter, r *http.Request) {
 		// fmt.Printf("File Size: %+v\n", h.Size)
 		// fmt.Printf("MIME Header: %+v\n", h.Header)
 		t := time.Now().Format(time.RFC3339) // 2009-11-10T23:00:00Z
-		name := string([]byte(`./assets/dog ` + t + ".jpg"))
+		name := string([]byte(`./assets/dog-` + t + ".jpg"))
 		tempFile, err := os.Create(name)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
