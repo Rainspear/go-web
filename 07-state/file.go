@@ -161,3 +161,9 @@ func test(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.New("test.gohtml").Parse(body))
 	tpl.ExecuteTemplate(w, "test.gohtml", fltd)
 }
+
+// to redirect to new path for fe use:
+// w.Header().Set("Location", "/") // set new route
+// w.WriteHeader(http.StatusSeeOther) // set status code for redirect 301 permanently - 303 always method get - 307 preserve code.
+// or using
+// http.Redirect(w, r, "/", http.StatusSeeOther)
