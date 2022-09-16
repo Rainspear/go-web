@@ -12,6 +12,9 @@ func main() {
 	// qs := queryState{}
 	// run(qs)
 
-	fs := fileState{}
-	run(fs)
+	// fs := fileState{}
+	// run(fs)
+
+	cs := cookieState{}
+	run(cs)
 }
