@@ -52,21 +52,56 @@ func cat(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveDogImage(w http.ResponseWriter, r *http.Request) {
+	status := ""
 	if r.Method == http.MethodPost { // upload image
-		f, h, err := r.FormFile("q")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		fmt.Println("\nfile:", f, "\nheader:", h, "\nerr", err)
+		// f, h, err := r.FormFile("q")
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// }
+		// fmt.Println("\nfile:", f, "\nheader:", h, "\nerr", err)
 
-		t := time.Now().Format(time.RFC3339) // 2009-11-10T23:00:00Z
-		name := string([]byte(`dog` + t + ".jpg"))
-		bs, err := ioutil.ReadAll(f)
+		// t := time.Now().Format(time.RFC3339) // 2009-11-10T23:00:00Z
+		// name := string([]byte(`dog` + t + ".jpg"))
+		// bs, err := ioutil.ReadAll(f)
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+		// os.WriteFile(name, bs, 0666)
+
+		r.ParseMultipartForm(1024 * 1024 * 10) // 10Mb maximum memory
+		f, h, err := r.FormFile("q")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		os.WriteFile(name, bs, 0666)
+		defer f.Close()
+
+		fmt.Printf("Uploaded File: %+v\n", h.Filename)
+		fmt.Printf("File Size: %+v\n", h.Size)
+		fmt.Printf("MIME Header: %+v\n", h.Header)
+
+		t := time.Now().Format(time.RFC3339) // 2009-11-10T23:00:00Z
+		name := string([]byte(`dog` + t + ".jpg"))
+		tempFile, err := os.Create(name)
+
+		// tempFile, err := os.CreateTemp("./assets", "image")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer tempFile.Close()
+
+		fileBytes, err := ioutil.ReadAll(f)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = tempFile.Write(fileBytes)
+		if err != nil {
+			status = "Write file to server failure\n"
+		} else {
+			status = "Successfully uploaded file\n"
+		}
 	}
 
 	// nf, err := os.Create(string(name))
@@ -74,7 +109,6 @@ func serveDogImage(w http.ResponseWriter, r *http.Request) {
 	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
 	// 	log.Println("Error when create file")
 	// }
-
 	// response
 	w.Header().Add("Content-Type", "text/html; charset=utf-8;")
 	io.WriteString(w, `
@@ -82,7 +116,7 @@ func serveDogImage(w http.ResponseWriter, r *http.Request) {
 	<input type="file" name="q">
 	<input type="submit">
 	</form>
- 
+	<div>`+status+` </div>
 	<br>`)
 }
 
