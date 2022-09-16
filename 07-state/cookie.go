@@ -12,13 +12,22 @@ type cookieState struct{}
 func (cookieState) executeMain() {
 	http.Handle("/set", http.HandlerFunc(setCookie))
 	http.Handle("/read", http.HandlerFunc(readCookie))
+	http.Handle("/expire", http.HandlerFunc(expireCookie))
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.ListenAndServe(":8089", nil)
 }
 
+func expireCookie(w http.ResponseWriter, r *http.Request) {
+	for _, v := range r.Cookies() {
+		v.MaxAge = -1 // < 0 will delete the cookie
+		http.SetCookie(w, v)
+	}
+	fmt.Fprintf(w, "Cookies are expired\n")
+	http.Redirect(w, r, "/read", http.StatusSeeOther)
+}
+
 func readCookie(w http.ResponseWriter, r *http.Request) {
-	c := r.Cookies()
-	fmt.Fprintf(w, "Cookie: %+v\n", c)
+	fmt.Fprintf(w, "Cookie: %+v\n", r.Cookies())
 }
 
 func setCookie(w http.ResponseWriter, r *http.Request) {
