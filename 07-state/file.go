@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -14,9 +15,9 @@ type fileState struct{}
 
 func (fileState) executeMain() {
 	http.Handle("/", http.HandlerFunc(cat))
+	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./assets"))))
 	http.Handle("/image", http.HandlerFunc(serveDogImage))
 	http.Handle("/test", http.HandlerFunc(test))
-	http.Handle("/static", http.StripPrefix("/static", http.FileServer(http.Dir("./assets"))))
 	http.ListenAndServe(":8089", nil)
 }
 
@@ -54,38 +55,20 @@ func cat(w http.ResponseWriter, r *http.Request) {
 func serveDogImage(w http.ResponseWriter, r *http.Request) {
 	status := ""
 	if r.Method == http.MethodPost { // upload image
-		// f, h, err := r.FormFile("q")
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// }
-		// fmt.Println("\nfile:", f, "\nheader:", h, "\nerr", err)
-
-		// t := time.Now().Format(time.RFC3339) // 2009-11-10T23:00:00Z
-		// name := string([]byte(`dog` + t + ".jpg"))
-		// bs, err := ioutil.ReadAll(f)
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-		// 	return
-		// }
-		// os.WriteFile(name, bs, 0666)
 
 		r.ParseMultipartForm(1024 * 1024 * 10) // 10Mb maximum memory
-		f, h, err := r.FormFile("q")
+		f, _, err := r.FormFile("q")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer f.Close()
-
-		fmt.Printf("Uploaded File: %+v\n", h.Filename)
-		fmt.Printf("File Size: %+v\n", h.Size)
-		fmt.Printf("MIME Header: %+v\n", h.Header)
-
+		// fmt.Printf("Uploaded File: %+v\n", h.Filename)
+		// fmt.Printf("File Size: %+v\n", h.Size)
+		// fmt.Printf("MIME Header: %+v\n", h.Header)
 		t := time.Now().Format(time.RFC3339) // 2009-11-10T23:00:00Z
-		name := string([]byte(`dog` + t + ".jpg"))
+		name := string([]byte(`./assets/dog ` + t + ".jpg"))
 		tempFile, err := os.Create(name)
-
-		// tempFile, err := os.CreateTemp("./assets", "image")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -103,12 +86,18 @@ func serveDogImage(w http.ResponseWriter, r *http.Request) {
 			status = "Successfully uploaded file\n"
 		}
 	}
-
-	// nf, err := os.Create(string(name))
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	log.Println("Error when create file")
-	// }
+	// find image name
+	dirs, err := os.ReadDir("./assets")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	imgName := "shiba.jpg"
+	for _, d := range dirs {
+		if strings.Contains(d.Name(), "dog") {
+			imgName = d.Name()
+			break
+		}
+	}
 	// response
 	w.Header().Add("Content-Type", "text/html; charset=utf-8;")
 	io.WriteString(w, `
@@ -116,7 +105,8 @@ func serveDogImage(w http.ResponseWriter, r *http.Request) {
 	<input type="file" name="q">
 	<input type="submit">
 	</form>
-	<div>`+status+` </div>
+	<div>`+status+`</div>
+	<img src="/static/`+imgName+"\""+` alt="dog" />
 	<br>`)
 }
 
