@@ -23,6 +23,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		cookie = &http.Cookie{
 			Name:  "session",
 			Value: id.String(),
+			// Secure: true, // attach to request header when connection is https
+			HttpOnly: true, // can not be accessed with javscript, only server can accessed
 		}
 		http.SetCookie(w, cookie)
 	}
