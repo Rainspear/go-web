@@ -94,6 +94,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 	data = dbUsers[uid]
 	fmt.Printf("data: %+v\n", data)
+
 	// return template
 	// tpl := template.Must(template.New("index.gohtml").ParseFiles("./template/index.gohtml"))
 	tpl.ExecuteTemplate(w, "index.gohtml", data)
