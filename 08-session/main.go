@@ -9,6 +9,9 @@ func run(s session) {
 }
 
 func main() {
-	is := uuidSession{}
-	run(is)
+	// is := uuidSession{}
+	// run(is)
+
+	us := userSession{}
+	run(us)
 }
