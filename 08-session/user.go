@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userSession struct{}
@@ -27,7 +28,7 @@ func (userSession) executeMain() {
 
 type User struct {
 	UserName string
-	Password string
+	Password []byte
 	First    string
 	Last     string
 }
@@ -63,7 +64,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 		p := r.FormValue("password")
 		f := r.FormValue("firstname")
 		l := r.FormValue("lastname")
-		data = User{u, p, f, l}
+
+		bs, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		data = User{u, bs, f, l}
 
 		// save new userId to session
 		dbSessions[c.Value] = u
