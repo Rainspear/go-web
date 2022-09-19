@@ -14,6 +14,7 @@ type user struct {
 	Password []byte
 	First    string
 	Last     string
+	Role     string
 }
 
 type session struct {
@@ -30,7 +31,7 @@ const sessionLength int = 30 // 30 seconds
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
 	btest, _ := bcrypt.GenerateFromPassword([]byte("123"), bcrypt.MinCost)
-	dbUsers["kanz"] = user{"kanz", btest, "Kanz", "Han"}
+	dbUsers["kanz"] = user{"kanz", btest, "Kanz", "Han", "007"}
 }
 
 func main() {
@@ -86,9 +87,55 @@ func signin(w http.ResponseWriter, r *http.Request) {
 }
 
 func signup(w http.ResponseWriter, r *http.Request) {
-	tpl.ExecuteTemplate(w, "signup.gohtml", nil)
+	var data user
+	if alreadyLoggedIn(w, r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	if r.Method == http.MethodPost {
+		u := r.FormValue("username")
+		p := r.FormValue("password")
+		f := r.FormValue("firstname")
+		l := r.FormValue("lastname")
+		r := r.FormValue("Role")
+
+		if _, ok := dbUsers[u]; ok {
+			http.Error(w, "Username already taken", http.StatusForbidden)
+			return
+		}
+		b, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.MinCost)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		sid := uuid.New().String()
+		c := &http.Cookie{
+			Name:   "session",
+			Value:  sid,
+			MaxAge: sessionLength,
+		}
+		data := user{u, b, f, l, r}
+		dbSessions[c.Value] = session{u, time.Now()}
+		dbUsers[u] = data
+		http.SetCookie(w, c)
+	}
+	tpl.ExecuteTemplate(w, "signup.gohtml", data)
 }
 
 func authorize(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func bar(w http.ResponseWriter, req *http.Request) {
+	u := getUserData(w, req)
+	if !alreadyLoggedIn(w, req) {
+		http.Redirect(w, req, "/", http.StatusSeeOther)
+		return
+	}
+	if u.Role != "007" {
+		http.Error(w, "You must be 007 to enter the bar", http.StatusForbidden)
+		return
+	}
+	showSessions() // for demonstration purposes
+	tpl.ExecuteTemplate(w, "bar.gohtml", u)
 }
