@@ -25,6 +25,7 @@ type session struct {
 var tpl *template.Template
 var dbUsers = map[string]user{}
 var dbSessions = map[string]session{}
+var dbSessionsCleaned time.Time
 
 const sessionLength int = 30 // 30 seconds
 
@@ -32,13 +33,14 @@ func init() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
 	btest, _ := bcrypt.GenerateFromPassword([]byte("123"), bcrypt.MinCost)
 	dbUsers["kanz"] = user{"kanz", btest, "Kanz", "Han", "007"}
+	dbSessionsCleaned = time.Now() // in real production it should clear when not in busy hour
 }
 
 func main() {
 	http.Handle("/bar", http.HandlerFunc(bar))
 	http.Handle("/signin", http.HandlerFunc(signin))
 	http.Handle("/signup", http.HandlerFunc(signup))
-	http.Handle("/authorize", http.HandlerFunc(authorized))
+	http.Handle("/signout", http.HandlerFunc(signout))
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.Handle("/", http.HandlerFunc(index))
 	http.ListenAndServe(":8089", nil)
@@ -70,7 +72,7 @@ func signin(w http.ResponseWriter, r *http.Request) {
 		}
 		err := bcrypt.CompareHashAndPassword(data.Password, []byte(p))
 		if err != nil {
-			http.Error(w, "username or password is not correct 123", http.StatusBadRequest)
+			http.Error(w, "username or password is not correct", http.StatusBadRequest)
 			return
 		}
 		sid := uuid.New().String()
@@ -87,18 +89,18 @@ func signin(w http.ResponseWriter, r *http.Request) {
 	tpl.ExecuteTemplate(w, "signin.gohtml", data)
 }
 
-func signup(w http.ResponseWriter, r *http.Request) {
+func signup(w http.ResponseWriter, req *http.Request) {
 	var data user
-	if alreadyLoggedIn(w, r) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	if alreadyLoggedIn(w, req) {
+		http.Redirect(w, req, "/", http.StatusSeeOther)
 		return
 	}
-	if r.Method == http.MethodPost {
-		u := r.FormValue("username")
-		p := r.FormValue("password")
-		f := r.FormValue("firstname")
-		l := r.FormValue("lastname")
-		r := r.FormValue("role")
+	if req.Method == http.MethodPost {
+		u := req.FormValue("username")
+		p := req.FormValue("password")
+		f := req.FormValue("firstname")
+		l := req.FormValue("lastname")
+		r := req.FormValue("role")
 
 		if _, ok := dbUsers[u]; ok {
 			http.Error(w, "Username already taken", http.StatusForbidden)
@@ -119,14 +121,37 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		dbSessions[c.Value] = session{u, time.Now()}
 		dbUsers[u] = data
 		http.SetCookie(w, c)
+		http.Redirect(w, req, "/", http.StatusSeeOther)
 	}
 	tpl.ExecuteTemplate(w, "signup.gohtml", data)
 }
 
-func authorized(w http.ResponseWriter, r *http.Request) {
+func signout(w http.ResponseWriter, r *http.Request) {
+	c, _ := r.Cookie("session")
+	delete(dbSessions, c.Value)
+	c = &http.Cookie{Name: "", Value: "", HttpOnly: true, MaxAge: -1}
+	http.SetCookie(w, c)
 
+	// this cleanup function should run as cron job in background in a certain unbusy time in a day
+	if time.Now().Sub(dbSessionsCleaned) > (time.Second * 30) { // clear after 30s from start and whatever people logout
+		go cleanSessions() //
+	}
+
+	http.Redirect(w, r, "/signin", http.StatusSeeOther)
 }
 
+// middleware authorized for all routes, if not redirect to login
+func authorized(h http.HandlerFunc) http.HandlerFunc { // middleware can apply for all route
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !alreadyLoggedIn(w, r) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+// route for authorized function, only "007" role can access data
 func bar(w http.ResponseWriter, req *http.Request) {
 	u := getUserData(w, req)
 	if !alreadyLoggedIn(w, req) {
