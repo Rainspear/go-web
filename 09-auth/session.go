@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -43,4 +44,12 @@ func getUserData(w http.ResponseWriter, r *http.Request) user {
 		u = dbUsers[s.userId]
 	}
 	return u
+}
+
+func showSessions() {
+	// fmt.Println("********")
+	for k, v := range dbSessions {
+		fmt.Println(k, v.userId)
+	}
+	fmt.Println("")
 }
