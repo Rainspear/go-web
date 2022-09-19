@@ -35,9 +35,10 @@ func init() {
 }
 
 func main() {
+	http.Handle("/bar", http.HandlerFunc(bar))
 	http.Handle("/signin", http.HandlerFunc(signin))
 	http.Handle("/signup", http.HandlerFunc(signup))
-	http.Handle("/authorize", http.HandlerFunc(authorize))
+	http.Handle("/authorize", http.HandlerFunc(authorized))
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.Handle("/", http.HandlerFunc(index))
 	http.ListenAndServe(":8089", nil)
@@ -122,7 +123,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 	tpl.ExecuteTemplate(w, "signup.gohtml", data)
 }
 
-func authorize(w http.ResponseWriter, r *http.Request) {
+func authorized(w http.ResponseWriter, r *http.Request) {
 
 }
 
