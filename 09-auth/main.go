@@ -40,7 +40,7 @@ func main() {
 	http.Handle("/bar", http.HandlerFunc(bar))
 	http.Handle("/signin", http.HandlerFunc(signin))
 	http.Handle("/signup", http.HandlerFunc(signup))
-	http.Handle("/signout", http.HandlerFunc(signout))
+	http.Handle("/signout", authorized(signout))
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.Handle("/", http.HandlerFunc(index))
 	http.ListenAndServe(":8089", nil)
@@ -144,9 +144,14 @@ func signout(w http.ResponseWriter, r *http.Request) {
 func authorized(h http.HandlerFunc) http.HandlerFunc { // middleware can apply for all route
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !alreadyLoggedIn(w, r) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
 		}
+		/*
+			because definition of http.HandlerFunc is: type HandlerFunc func(w http.ResponseWritter, r *http.Request)
+			and HandlerFunc override ServeHTTP(w,r) => Handler interface
+			h = signout
+		*/
 		h.ServeHTTP(w, r)
 	})
 }
