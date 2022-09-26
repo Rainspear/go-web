@@ -133,7 +133,8 @@ func signout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, c)
 
 	// this cleanup function should run as cron job in background in a certain unbusy time in a day
-	if time.Now().Sub(dbSessionsCleaned) > (time.Second * 30) { // clear after 30s from start and whatever people logout
+	// if time.Now().Sub(dbSessionsCleaned) > (time.Second * 30) { // clear after 30s from start and whatever people logout
+	if time.Since(dbSessionsCleaned) > (time.Second * 30) { // clear after 30s from start and whatever people logout
 		go cleanSessions() //
 	}
 
