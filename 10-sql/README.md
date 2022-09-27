@@ -28,6 +28,8 @@ mysql -u root -p
 
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket; // this mean next time to connect mysql, should use 'sudo mysql'
 
+ALTER USER 'sammy'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'; // for connect to mysql which not use sudo anymore
+
 4. Create a new user for application only
 
 sudo mysql
@@ -55,3 +57,4 @@ sudo apt install mysql-workbench-community
 9. Launch workbench
 
 mysql-workbench
+
