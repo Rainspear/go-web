@@ -3,14 +3,15 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	// link := "root:password@tcp(localhost:3306)/demo?charset=utf8"
-	link := "user:password@tcp(localhost:3306)/demo?charset=utf8"
+	// link := "root:P@ssw0rd@tcp(localhost:3306)/demo?charset=utf8"
+	link := "golang:password@tcp(localhost:3306)/demo?charset=utf8"
 	db, err := sql.Open("mysql", link)
 	check(err)
 	defer db.Close()
@@ -23,7 +24,7 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-
+	io.WriteString(w, "successfully connect to mysql")
 }
 
 func check(err error) {
